@@ -1,0 +1,16 @@
+version: '3'
+
+tasks:
+  dev:
+    aliases:
+      - dev
+    desc: 'run Love Signal API app with local config'
+    cmds:
+      - go run ./cmd/sso-api/main.go --config=./config/local.yaml
+
+  swagger:
+    aliases:
+      - swagger
+    desc: 'create swagger doc'
+    cmds:
+      - swag init --pd -g cmd/love-signal-api/main.go -ot "go,json" -p "camelcase"
