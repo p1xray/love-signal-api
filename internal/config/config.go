@@ -9,13 +9,24 @@ import (
 
 // Config is the project configuration.
 type Config struct {
-	Env    string       `yaml:"env" env-default:"local"`
-	Server ServerConfig `yaml:"server" env-required:"true"`
+	Env         string       `yaml:"env" env-default:"local"`
+	Server      ServerConfig `yaml:"server" env-required:"true"`
+	GRPCClients GRPCClients  `yaml:"grpc"`
 }
 
 // ServerConfig is the server configuration.
 type ServerConfig struct {
 	Port int `yaml:"port" env-required:"true"`
+}
+
+// GRPCClients is the configuration of gRPC clients.
+type GRPCClients struct {
+	Users GRPCClient `yaml:"users"`
+}
+
+// GRPCClient is the configuration of gRPC client.
+type GRPCClient struct {
+	Addr string `yaml:"address" env-required:"true"`
 }
 
 // MustLoad loads config and panics if any error occurs.

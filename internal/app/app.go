@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log/slog"
+	grpcapp "love-signal-api/internal/app/grpc"
 	httpapp "love-signal-api/internal/app/http"
 	"love-signal-api/internal/config"
 	"love-signal-api/internal/lib/logger/sl"
@@ -22,7 +23,13 @@ func New(
 	log *slog.Logger,
 	cfg *config.Config,
 ) *App {
-	httpApp := httpapp.New(log, cfg.Server.Port)
+	grpcApp := grpcapp.New(log, cfg)
+	grpcClient, err := grpcApp.CreateGRPCClient()
+	if err != nil {
+		panic(err)
+	}
+
+	httpApp := httpapp.New(log, cfg.Server.Port, grpcClient)
 
 	return &App{
 		log:     log,

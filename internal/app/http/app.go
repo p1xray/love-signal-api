@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	grpcclient "love-signal-api/internal/client/grpc"
 	"net/http"
 
 	controller "love-signal-api/internal/controller/http"
@@ -16,8 +17,8 @@ type App struct {
 }
 
 // New creates new instance of HTTP server application.
-func New(log *slog.Logger, port int) *App {
-	handlers := controller.New()
+func New(log *slog.Logger, port int, grpcClient *grpcclient.GRPCClient) *App {
+	handlers := controller.New(grpcClient)
 
 	httpServer := &http.Server{
 		Addr:    fmt.Sprintf(":%d", port),
