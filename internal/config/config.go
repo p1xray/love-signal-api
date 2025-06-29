@@ -9,7 +9,13 @@ import (
 
 // Config is the project configuration.
 type Config struct {
-	Env string `yaml:"env" env-default:"local"`
+	Env    string       `yaml:"env" env-default:"local"`
+	Server ServerConfig `yaml:"server" env-required:"true"`
+}
+
+// ServerConfig is the server configuration.
+type ServerConfig struct {
+	Port int `yaml:"port" env-required:"true"`
 }
 
 // MustLoad loads config and panics if any error occurs.

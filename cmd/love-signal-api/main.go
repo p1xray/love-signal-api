@@ -3,9 +3,12 @@ package main
 import (
 	"github.com/joho/godotenv"
 	"log/slog"
+	"love-signal-api/internal/app"
 	"love-signal-api/internal/config"
 	"love-signal-api/internal/lib/logger/handlers/slogpretty"
 	"os"
+	"os/signal"
+	"syscall"
 )
 
 const (
@@ -25,6 +28,21 @@ func main() {
 	log := setupLogger(cfg.Env)
 
 	log.Info("starting application", slog.Any("config", cfg))
+
+	application := app.New(log, cfg)
+
+	go func() {
+		application.MustRun()
+	}()
+
+	// Graceful shutdown
+	stop := make(chan os.Signal, 1)
+	signal.Notify(stop, syscall.SIGTERM, syscall.SIGINT)
+
+	<-stop
+
+	application.GracefulStop()
+	log.Info("application stopped")
 }
 
 func setupLogger(env string) *slog.Logger {
