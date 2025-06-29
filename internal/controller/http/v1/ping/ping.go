@@ -19,6 +19,20 @@ func InitRoutes(api *gin.RouterGroup) {
 	}
 }
 
+// Checking the connection
+//
+//	@Summary		Checking the connection
+//	@Description	Checking the connection
+//	@Tags			Ping
+//	@Id 			ping
+//	@Accept			json
+//	@Produce		plain
+//	@Success		200	{string}	string	"pong"
+//	@Failure		400	{string}	string	"ok"
+//	@Failure		404	{string}	string	"ok"
+//	@Failure		500	{string}	string	"ok"
+//
+// @Router			/api/v1/ping [get]
 func (r *Routes) ping(c *gin.Context) {
 	c.String(http.StatusOK, "pong")
 }

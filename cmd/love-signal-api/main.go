@@ -17,6 +17,15 @@ const (
 	envProd  = "prod"
 )
 
+// @title Love Signal API
+// @version 1.0
+// @description API server for Love Signal
+
+// @securitydefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
+// @BasePath /
 func main() {
 	err := godotenv.Load()
 	if err != nil {
