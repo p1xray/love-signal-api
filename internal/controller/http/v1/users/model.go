@@ -25,3 +25,9 @@ type UserProfileCardOutput struct {
 	DateOfBirth   *time.Time  `json:"date_of_birth"`   // User date of birth.
 	AvatarFileKey *string     `json:"avatar_file_key"` // User avatar file key.
 } // @name UserProfileCardOutput
+
+// UserFollowLinkCardOutput is output model of user follow link card request.
+type UserFollowLinkCardOutput struct {
+	ShortLink string `json:"short_link"` // User follow short link.
+	QRCode    string `json:"qr_code"`    // QR code of user follow short link as base64.
+} // @name UserFollowLinkCardOutput

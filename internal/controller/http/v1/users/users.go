@@ -1,6 +1,8 @@
 package users
 
 import (
+	"encoding/base64"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	lsuserspb "github.com/p1xray/love-signal-protos/gen/go/users"
 	"love-signal-api/internal/server"
@@ -20,6 +22,7 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 	{
 		profile.GET("/user-info", r.userInfo)
 		profile.GET("/profile", r.userProfileCard)
+		profile.GET("/follow-link", r.followLinkCard)
 	}
 }
 
@@ -67,7 +70,7 @@ func (r *Routes) userInfo(c *gin.Context) {
 //	@Router			/api/v1/users/profile [get]
 func (r *Routes) userProfileCard(c *gin.Context) {
 	userExternalID := int64(1) // TODO: get it from token
-	
+
 	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
 	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
 	if err != nil {
@@ -104,4 +107,45 @@ func (r *Routes) userProfileCard(c *gin.Context) {
 	}
 
 	server.SuccessResponse(c, &userProfileCard)
+}
+
+// User follow link card.
+//
+//	@Summary		User follow link card
+//	@Description	User follow link card
+//	@Tags			Users
+//	@Id 			followLinkCard
+//	@Produce		json
+//	@Security 		ApiKeyAuth
+//	@Success		200	{object}  server.dataResponse[UserFollowLinkCardOutput]
+//	@Failure		500	{object}  server.dataResponse[UserFollowLinkCardOutput]
+//	@Router			/api/v1/users/follow-link [get]
+func (r *Routes) followLinkCard(c *gin.Context) {
+	userExternalID := int64(1) // TODO: get it from token
+
+	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
+	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[UserFollowLinkCardOutput](c, err.Error())
+		return
+	}
+
+	host := server.GetHost(c)
+	userID := grpcUserDataResponse.GetId()
+	followLink := fmt.Sprintf("%s/api/v1/users/follow/%d", host, userID)
+
+	// TODO: shorten link
+	shortFollowLink := followLink
+
+	// TODO: generate QR code from short follow link
+	QRCode := base64.StdEncoding.EncodeToString([]byte("qr-code"))
+
+	userFollowLinkCard := UserFollowLinkCardOutput{
+		ShortLink: shortFollowLink,
+		QRCode:    QRCode,
+	}
+
+	server.SuccessResponse(c, &userFollowLinkCard)
 }

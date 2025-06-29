@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	idParam = "id"
+	idParam          = "id"
+	originHeaderName = "Origin"
 )
 
 func GetParamFromRoute(c *gin.Context, name string) (int64, error) {
@@ -53,4 +54,8 @@ func GetInputFromForm[T any](c *gin.Context) (T, error) {
 	}
 
 	return inp, nil
+}
+
+func GetHost(c *gin.Context) string {
+	return c.Request.Header.Get(originHeaderName)
 }
