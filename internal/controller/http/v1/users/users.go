@@ -23,6 +23,7 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 		profile.GET("/user-info", r.userInfo)
 		profile.GET("/profile", r.userProfileCard)
 		profile.GET("/follow-link", r.followLinkCard)
+		profile.GET("/follow/:id", r.followCard)
 	}
 }
 
@@ -148,4 +149,47 @@ func (r *Routes) followLinkCard(c *gin.Context) {
 	}
 
 	server.SuccessResponse(c, &userFollowLinkCard)
+}
+
+// User follow card.
+//
+//	@Summary		User follow card
+//	@Description	User follow card
+//	@Tags			Users
+//	@Id 			followCard
+//	@Produce		json
+//	@Security 		ApiKeyAuth
+//	@Param			id	path  int  true  "User ID"
+//	@Success		200	{object}  server.dataResponse[UserFollowCardOutput]
+//	@Failure		500	{object}  server.dataResponse[UserFollowCardOutput]
+//	@Router			/api/v1/users/follow/{id} [get]
+func (r *Routes) followCard(c *gin.Context) {
+	userID, err := server.GetIdFromRoute(c)
+	if err != nil {
+		server.ErrorResponse[UserFollowCardOutput](c, err.Error())
+		return
+	}
+
+	grpcUserDataRequest := &lsuserspb.GetUserDataRequest{UserId: userID}
+	grpcUserDataResponse, err := r.grpcUsersClient.GetUserData(c.Request.Context(), grpcUserDataRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[UserFollowCardOutput](c, err.Error())
+		return
+	}
+
+	var avatarFileKey *string
+	if grpcUserDataResponse.GetAvatarFileKey() != nil {
+		avatarFileKeyValue := grpcUserDataResponse.GetAvatarFileKey().GetValue()
+		avatarFileKey = &avatarFileKeyValue
+	}
+
+	userFollowCard := UserFollowCardOutput{
+		ID:            grpcUserDataResponse.GetId(),
+		FullName:      grpcUserDataResponse.GetFullName(),
+		AvatarFileKey: avatarFileKey,
+	}
+
+	server.SuccessResponse(c, &userFollowCard)
 }

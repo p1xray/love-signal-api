@@ -31,3 +31,10 @@ type UserFollowLinkCardOutput struct {
 	ShortLink string `json:"short_link"` // User follow short link.
 	QRCode    string `json:"qr_code"`    // QR code of user follow short link as base64.
 } // @name UserFollowLinkCardOutput
+
+// UserFollowCardOutput is output model of user follow card request.
+type UserFollowCardOutput struct {
+	ID            int64   `json:"id"`              // User ID.
+	FullName      string  `json:"full_name"`       // User full name.
+	AvatarFileKey *string `json:"avatar_file_key"` // User avatar file key.
+} // @name UserFollowCardOutput
