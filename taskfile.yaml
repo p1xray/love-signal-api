@@ -1,0 +1,9 @@
+version: '3'
+
+tasks:
+  dev:
+    aliases:
+      - dev
+    desc: 'run Love Signal API app with local config'
+    cmds:
+      - go run ./cmd/sso-api/main.go --config=./config/local.yaml
