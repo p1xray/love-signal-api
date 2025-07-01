@@ -25,6 +25,7 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 		profile.GET("/follow-link", r.followLinkCard)
 		profile.GET("/follow/:id", r.followCard)
 		profile.GET("/followed", r.followedList)
+		profile.POST("/follow", r.follow)
 	}
 }
 
@@ -248,4 +249,50 @@ func (r *Routes) followedList(c *gin.Context) {
 	output := FollowedUsersOutput{Users: followedUsers}
 
 	server.SuccessResponse(c, &output)
+}
+
+// Follow user.
+//
+//	@Summary		Follow user
+//	@Description	Follow user
+//	@Tags			Users
+//	@Id 			follow
+//	@Produce		json
+//	@Security 		ApiKeyAuth
+//	@Param			input body FollowInput true "Input parameters for follow user."
+//	@Success		200	{object}  server.dataResponse[bool]
+//	@Failure		500	{object}  server.dataResponse[bool]
+//	@Router			/api/v1/users/follow [post]
+func (r *Routes) follow(c *gin.Context) {
+	userExternalID := int64(1) // TODO: get it from token
+
+	inp, err := server.GetInputFromBody[FollowInput](c)
+	if err != nil {
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
+
+	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
+	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
+
+	grpcFollowUserRequest := &lsuserspb.FollowUserRequest{
+		UserId:         grpcUserDataResponse.GetId(),
+		UserIdToFollow: inp.UserIDToFollow,
+	}
+	grpcFollowUserResponse, err := r.grpcUsersClient.FollowUser(c.Request.Context(), grpcFollowUserRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
+
+	success := grpcFollowUserResponse.GetSuccess()
+	server.SuccessResponse[bool](c, &success)
 }

@@ -52,3 +52,8 @@ type FollowedUserOutput struct {
 	AvatarFileKey *string `json:"avatar_file_key"` // User avatar file key.
 	NumberOfLikes uint32  `json:"number_of_likes"` // Number of likes.
 } // @name FollowedUserOutput
+
+// FollowInput is input model of follow user request.
+type FollowInput struct {
+	UserIDToFollow int64 `json:"user_id_to_follow"` // User ID to follow.
+} // @name FollowInput
