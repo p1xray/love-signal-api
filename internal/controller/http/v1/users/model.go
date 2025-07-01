@@ -57,3 +57,8 @@ type FollowedUserOutput struct {
 type FollowInput struct {
 	UserIDToFollow int64 `json:"user_id_to_follow"` // User ID to follow.
 } // @name FollowInput
+
+// UnfollowInput is input model of unfollow user request.
+type UnfollowInput struct {
+	FollowLinkID int64 `json:"follow_link_id"` // Follow link ID.
+} // @name UnfollowInput

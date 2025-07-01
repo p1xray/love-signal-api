@@ -26,6 +26,7 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 		profile.GET("/follow/:id", r.followCard)
 		profile.GET("/followed", r.followedList)
 		profile.POST("/follow", r.follow)
+		profile.POST("/unfollow", r.unfollow)
 	}
 }
 
@@ -294,5 +295,37 @@ func (r *Routes) follow(c *gin.Context) {
 	}
 
 	success := grpcFollowUserResponse.GetSuccess()
+	server.SuccessResponse[bool](c, &success)
+}
+
+// Unfollow user.
+//
+//	@Summary		Unfollow user
+//	@Description	Unfollow user
+//	@Tags			Users
+//	@Id 			unfollow
+//	@Produce		json
+//	@Security 		ApiKeyAuth
+//	@Param			input body UnfollowInput true "Input parameters for unfollow user."
+//	@Success		200	{object}  server.dataResponse[bool]
+//	@Failure		500	{object}  server.dataResponse[bool]
+//	@Router			/api/v1/users/unfollow [post]
+func (r *Routes) unfollow(c *gin.Context) {
+	inp, err := server.GetInputFromBody[UnfollowInput](c)
+	if err != nil {
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
+
+	grpcUnfollowUserRequest := &lsuserspb.UnfollowUserRequest{FollowLinkId: inp.FollowLinkID}
+	grpcUnfollowUserResponse, err := r.grpcUsersClient.UnfollowUser(c.Request.Context(), grpcUnfollowUserRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
+
+	success := grpcUnfollowUserResponse.GetSuccess()
 	server.SuccessResponse[bool](c, &success)
 }
