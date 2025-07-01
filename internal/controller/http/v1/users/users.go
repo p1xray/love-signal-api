@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	lsuserspb "github.com/p1xray/love-signal-protos/gen/go/users"
+	"love-signal-api/internal/controller/http/middleware"
 	"love-signal-api/internal/server"
 	"time"
 )
@@ -18,15 +19,16 @@ type Routes struct {
 func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 	r := &Routes{grpcUsersClient: grpcUsersClient}
 
-	profile := api.Group("/users")
+	users := api.Group("/users")
+	users.Use(middleware.CheckJWT())
 	{
-		profile.GET("/user-info", r.userInfo)
-		profile.GET("/profile", r.userProfileCard)
-		profile.GET("/follow-link", r.followLinkCard)
-		profile.GET("/follow/:id", r.followCard)
-		profile.GET("/followed", r.followedList)
-		profile.POST("/follow", r.follow)
-		profile.POST("/unfollow", r.unfollow)
+		users.GET("/user-info", middleware.HasScope("users.read"), r.userInfo)
+		users.GET("/profile", middleware.HasScope("users.read"), r.userProfileCard)
+		users.GET("/follow-link", middleware.HasScope("users.read"), r.followLinkCard)
+		users.GET("/follow/:id", middleware.HasScope("users.read"), r.followCard)
+		users.GET("/followed", middleware.HasScope("users.read"), r.followedList)
+		users.POST("/follow", middleware.HasScope("users.add"), r.follow)
+		users.POST("/unfollow", middleware.HasScope("users.delete"), r.unfollow)
 	}
 }
 
@@ -42,7 +44,11 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 //	@Failure		500	{object}  server.dataResponse[UserInfoOutput]
 //	@Router			/api/v1/users/user-info [get]
 func (r *Routes) userInfo(c *gin.Context) {
-	userExternalID := int64(1) // TODO: get it from token
+	userExternalID, err := server.GetUserID(c)
+	if err != nil {
+		server.ErrorResponse[UserInfoOutput](c, err.Error())
+		return
+	}
 
 	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
 	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
@@ -73,7 +79,11 @@ func (r *Routes) userInfo(c *gin.Context) {
 //	@Failure		500	{object}  server.dataResponse[UserProfileCardOutput]
 //	@Router			/api/v1/users/profile [get]
 func (r *Routes) userProfileCard(c *gin.Context) {
-	userExternalID := int64(1) // TODO: get it from token
+	userExternalID, err := server.GetUserID(c)
+	if err != nil {
+		server.ErrorResponse[UserProfileCardOutput](c, err.Error())
+		return
+	}
 
 	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
 	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
@@ -125,7 +135,11 @@ func (r *Routes) userProfileCard(c *gin.Context) {
 //	@Failure		500	{object}  server.dataResponse[UserFollowLinkCardOutput]
 //	@Router			/api/v1/users/follow-link [get]
 func (r *Routes) followLinkCard(c *gin.Context) {
-	userExternalID := int64(1) // TODO: get it from token
+	userExternalID, err := server.GetUserID(c)
+	if err != nil {
+		server.ErrorResponse[UserFollowLinkCardOutput](c, err.Error())
+		return
+	}
 
 	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
 	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
@@ -209,7 +223,11 @@ func (r *Routes) followCard(c *gin.Context) {
 //	@Failure		500	{object}  server.dataResponse[FollowedUsersOutput]
 //	@Router			/api/v1/users/followed [get]
 func (r *Routes) followedList(c *gin.Context) {
-	userExternalID := int64(2) // TODO: get it from token
+	userExternalID, err := server.GetUserID(c)
+	if err != nil {
+		server.ErrorResponse[FollowedUsersOutput](c, err.Error())
+		return
+	}
 
 	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
 	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
@@ -265,7 +283,11 @@ func (r *Routes) followedList(c *gin.Context) {
 //	@Failure		500	{object}  server.dataResponse[bool]
 //	@Router			/api/v1/users/follow [post]
 func (r *Routes) follow(c *gin.Context) {
-	userExternalID := int64(1) // TODO: get it from token
+	userExternalID, err := server.GetUserID(c)
+	if err != nil {
+		server.ErrorResponse[bool](c, err.Error())
+		return
+	}
 
 	inp, err := server.GetInputFromBody[FollowInput](c)
 	if err != nil {
