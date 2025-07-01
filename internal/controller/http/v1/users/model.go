@@ -38,3 +38,17 @@ type UserFollowCardOutput struct {
 	FullName      string  `json:"full_name"`       // User full name.
 	AvatarFileKey *string `json:"avatar_file_key"` // User avatar file key.
 } // @name UserFollowCardOutput
+
+// FollowedUsersOutput is output model of followed users list request.
+type FollowedUsersOutput struct {
+	Users []FollowedUserOutput `json:"users"` // Followed users list.
+} // @name FollowedUsersOutput
+
+// FollowedUserOutput is output model of followed user for list.
+type FollowedUserOutput struct {
+	FollowLinkID  int64   `json:"follow_link_id"`  // Follow link ID.
+	UserID        int64   `json:"user_id"`         // User ID.
+	FullName      string  `json:"full_name"`       // User full name.
+	AvatarFileKey *string `json:"avatar_file_key"` // User avatar file key.
+	NumberOfLikes uint32  `json:"number_of_likes"` // Number of likes.
+} // @name FollowedUserOutput

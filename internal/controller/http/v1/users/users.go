@@ -24,6 +24,7 @@ func InitRoutes(api *gin.RouterGroup, grpcUsersClient lsuserspb.UsersClient) {
 		profile.GET("/profile", r.userProfileCard)
 		profile.GET("/follow-link", r.followLinkCard)
 		profile.GET("/follow/:id", r.followCard)
+		profile.GET("/followed", r.followedList)
 	}
 }
 
@@ -192,4 +193,59 @@ func (r *Routes) followCard(c *gin.Context) {
 	}
 
 	server.SuccessResponse(c, &userFollowCard)
+}
+
+// Followed users list.
+//
+//	@Summary		Followed users list
+//	@Description	Followed users list
+//	@Tags			Users
+//	@Id 			followedList
+//	@Produce		json
+//	@Security 		ApiKeyAuth
+//	@Success		200	{object}  server.dataResponse[FollowedUsersOutput]
+//	@Failure		500	{object}  server.dataResponse[FollowedUsersOutput]
+//	@Router			/api/v1/users/followed [get]
+func (r *Routes) followedList(c *gin.Context) {
+	userExternalID := int64(2) // TODO: get it from token
+
+	grpcUserDataRequest := &lsuserspb.GetUserDataByExternalIdRequest{UserExternalId: userExternalID}
+	grpcUserDataResponse, err := r.grpcUsersClient.GetUserDataByExternalId(c.Request.Context(), grpcUserDataRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[FollowedUsersOutput](c, err.Error())
+		return
+	}
+
+	grpcFollowedUsersRequest := &lsuserspb.GetFollowedUsersRequest{UserId: grpcUserDataResponse.GetId()}
+	grpcFollowedUsersResponse, err := r.grpcUsersClient.GetFollowedUsers(c.Request.Context(), grpcFollowedUsersRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[FollowedUsersOutput](c, err.Error())
+		return
+	}
+
+	followedUsers := make([]FollowedUserOutput, 0, len(grpcFollowedUsersResponse.Users))
+	for _, user := range grpcFollowedUsersResponse.Users {
+		var avatarFileKey *string
+		if grpcUserDataResponse.GetAvatarFileKey() != nil {
+			avatarFileKeyValue := grpcUserDataResponse.GetAvatarFileKey().GetValue()
+			avatarFileKey = &avatarFileKeyValue
+		}
+
+		followedUser := FollowedUserOutput{
+			FollowLinkID:  user.GetFollowLinkId(),
+			UserID:        user.GetUserId(),
+			FullName:      user.GetFullName(),
+			AvatarFileKey: avatarFileKey,
+			NumberOfLikes: user.GetNumberOfLikes(),
+		}
+		followedUsers = append(followedUsers, followedUser)
+	}
+
+	output := FollowedUsersOutput{Users: followedUsers}
+
+	server.SuccessResponse(c, &output)
 }
