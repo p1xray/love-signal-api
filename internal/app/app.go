@@ -29,7 +29,7 @@ func New(
 		panic(err)
 	}
 
-	httpApp := httpapp.New(log, cfg.Server.Port, grpcClient)
+	httpApp := httpapp.New(log, cfg, grpcClient)
 
 	return &App{
 		log:     log,

@@ -98,6 +98,8 @@ github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e h1:fD57ERR4JtEqsWb
 github.com/niemeyer/pretty v0.0.0-20200227124842-a10e7caefd8e/go.mod h1:zD1mROLANZcx1PVRCS0qkT7pwLkGfwJo4zjcN/Tysno=
 github.com/p1xray/love-signal-protos v0.0.10 h1:jcX9nVRmB7ZhBhjkNOM6KU+GuMO2kKQYfA95kckPgVM=
 github.com/p1xray/love-signal-protos v0.0.10/go.mod h1:WowhyM0Uh7Qs8LAqWae2dDbzjM4eDj69b35tuu+8AJo=
+github.com/p1xray/pxr-qrcode v0.0.1 h1:QNv7Xwtwo6JSI4gAXoTQCFUBdsP1NoUqAKoozBR1YKY=
+github.com/p1xray/pxr-qrcode v0.0.1/go.mod h1:e4asblRMGIHgvr4YJjkITE1LzNcShzSpW7AnEpNHroc=
 github.com/p1xray/pxr-sso v0.0.5 h1:4IWphGjnl/Dmrn6V9v4MPSHeICep0YgotLR+HfiR20c=
 github.com/p1xray/pxr-sso v0.0.5/go.mod h1:XxfIe7iNb1zqeOADEMqQlg6kIkDtGcbFExBaUqY/Kjw=
 github.com/p1xray/pxr-url-shortener v0.0.2 h1:vfn2bYaH1QKHYtrvtZEL0C5A2/djMjmuzxFjU91VyOw=
