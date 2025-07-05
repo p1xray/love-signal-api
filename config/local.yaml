@@ -4,3 +4,5 @@ server:
 grpc:
   users:
     address: 'localhost:6005'
+  url_shortener:
+    address: 'localhost:6007'

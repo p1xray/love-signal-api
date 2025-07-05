@@ -3,6 +3,7 @@ package grpcapp
 import (
 	"fmt"
 	lsuserspb "github.com/p1xray/love-signal-protos/gen/go/users"
+	urlshortenerpb "github.com/p1xray/pxr-url-shortener/pkg/grpc/gen/go/urlshortener"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 	"log/slog"
@@ -33,7 +34,13 @@ func (a *App) CreateGRPCClient() (*grpcclient.GRPCClient, error) {
 		return nil, fmt.Errorf("error creating users grpc client: %w", err)
 	}
 
-	return grpcclient.New(users), nil
+	urlShortener, err := a.createUrlShortenerClient()
+	if err != nil {
+		a.log.Error("error creating url shortener grpc client", sl.Err(err))
+		return nil, fmt.Errorf("error creating url shortener grpc client: %w", err)
+	}
+
+	return grpcclient.New(users, urlShortener), nil
 }
 
 func (a *App) createUsersClient() (lsuserspb.UsersClient, error) {
@@ -48,4 +55,18 @@ func (a *App) createUsersClient() (lsuserspb.UsersClient, error) {
 
 	usersClient := lsuserspb.NewUsersClient(con)
 	return usersClient, nil
+}
+
+func (a *App) createUrlShortenerClient() (urlshortenerpb.UrlShortenerClient, error) {
+	const op = "grpcapp.createUrlShortenerClient"
+
+	con, err := grpc.NewClient(
+		a.config.GRPCClients.UrlShortener.Addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	urlShortenerClient := urlshortenerpb.NewUrlShortenerClient(con)
+	return urlShortenerClient, nil
 }
