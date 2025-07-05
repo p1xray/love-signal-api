@@ -16,13 +16,14 @@ type Config struct {
 
 // ServerConfig is the server configuration.
 type ServerConfig struct {
-	Port int `yaml:"port" env-required:"true"`
+	Addr string `yaml:"address" env-required:"true"`
 }
 
 // GRPCClients is the configuration of gRPC clients.
 type GRPCClients struct {
 	Users        GRPCClient `yaml:"users"`
 	UrlShortener GRPCClient `yaml:"url_shortener"`
+	QRCode       GRPCClient `yaml:"qr_code"`
 }
 
 // GRPCClient is the configuration of gRPC client.

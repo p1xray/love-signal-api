@@ -8,6 +8,7 @@ require (
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/joho/godotenv v1.5.1
 	github.com/p1xray/love-signal-protos v0.0.10
+	github.com/p1xray/pxr-qrcode v0.0.1
 	github.com/p1xray/pxr-sso v0.0.5
 	github.com/p1xray/pxr-url-shortener v0.0.2
 	github.com/swaggo/files v1.0.1

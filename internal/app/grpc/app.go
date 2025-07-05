@@ -3,6 +3,7 @@ package grpcapp
 import (
 	"fmt"
 	lsuserspb "github.com/p1xray/love-signal-protos/gen/go/users"
+	qrcodepb "github.com/p1xray/pxr-qrcode/pkg/grpc/gen/go/qrcode"
 	urlshortenerpb "github.com/p1xray/pxr-url-shortener/pkg/grpc/gen/go/urlshortener"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -40,7 +41,13 @@ func (a *App) CreateGRPCClient() (*grpcclient.GRPCClient, error) {
 		return nil, fmt.Errorf("error creating url shortener grpc client: %w", err)
 	}
 
-	return grpcclient.New(users, urlShortener), nil
+	qrCode, err := a.createQRCodeClient()
+	if err != nil {
+		a.log.Error("error creating QR-code grpc client", sl.Err(err))
+		return nil, fmt.Errorf("error creating QR-code grpc client: %w", err)
+	}
+
+	return grpcclient.New(users, urlShortener, qrCode), nil
 }
 
 func (a *App) createUsersClient() (lsuserspb.UsersClient, error) {
@@ -69,4 +76,18 @@ func (a *App) createUrlShortenerClient() (urlshortenerpb.UrlShortenerClient, err
 
 	urlShortenerClient := urlshortenerpb.NewUrlShortenerClient(con)
 	return urlShortenerClient, nil
+}
+
+func (a *App) createQRCodeClient() (qrcodepb.QrCodeClient, error) {
+	const op = "grpcapp.createQRCodeClient"
+
+	con, err := grpc.NewClient(
+		a.config.GRPCClients.QRCode.Addr,
+		grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, fmt.Errorf("%s: %w", op, err)
+	}
+
+	qrCodeClient := qrcodepb.NewQrCodeClient(con)
+	return qrCodeClient, nil
 }

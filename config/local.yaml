@@ -1,8 +1,10 @@
 env: 'local'
 server:
-  port: 6006
+  address: 'localhost:6006'
 grpc:
   users:
     address: 'localhost:6005'
   url_shortener:
     address: 'localhost:6007'
+  qr_code:
+    address: 'localhost:6009'
