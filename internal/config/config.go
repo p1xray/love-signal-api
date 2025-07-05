@@ -21,7 +21,8 @@ type ServerConfig struct {
 
 // GRPCClients is the configuration of gRPC clients.
 type GRPCClients struct {
-	Users GRPCClient `yaml:"users"`
+	Users        GRPCClient `yaml:"users"`
+	UrlShortener GRPCClient `yaml:"url_shortener"`
 }
 
 // GRPCClient is the configuration of gRPC client.

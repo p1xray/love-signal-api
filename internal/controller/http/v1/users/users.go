@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	lsuserspb "github.com/p1xray/love-signal-protos/gen/go/users"
+	urlshortenerpb "github.com/p1xray/pxr-url-shortener/pkg/grpc/gen/go/urlshortener"
 	"love-signal-api/internal/controller/http/middleware"
 	"love-signal-api/internal/server"
 	"time"
@@ -12,7 +13,8 @@ import (
 
 // Routes provides routes for users.
 type Routes struct {
-	grpcUsersClient lsuserspb.UsersClient
+	grpcUsersClient        lsuserspb.UsersClient
+	grpcUrlShortenerClient urlshortenerpb.UrlShortenerClient
 }
 
 // InitRoutes initializes the routes for users.
@@ -154,8 +156,16 @@ func (r *Routes) followLinkCard(c *gin.Context) {
 	userID := grpcUserDataResponse.GetId()
 	followLink := fmt.Sprintf("%s/api/v1/users/follow/%d", host, userID)
 
-	// TODO: shorten link
-	shortFollowLink := followLink
+	grpcShortenRequest := &urlshortenerpb.ShortenRequest{LongUrl: followLink}
+	grpcShortenResponse, err := r.grpcUrlShortenerClient.Shorten(c.Request.Context(), grpcShortenRequest)
+	if err != nil {
+		// TODO: check error from gRPC server and return correct error
+
+		server.ErrorResponse[UserFollowLinkCardOutput](c, err.Error())
+		return
+	}
+
+	shortFollowLink := grpcShortenResponse.GetShortUrl()
 
 	// TODO: generate QR code from short follow link
 	QRCode := base64.StdEncoding.EncodeToString([]byte("qr-code"))
