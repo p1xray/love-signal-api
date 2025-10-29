@@ -6,7 +6,7 @@ tasks:
       - dev
     desc: 'run Love Signal API app with local config'
     cmds:
-      - go run ./cmd/sso-api/main.go --config=./config/local.yaml
+      - go run ./cmd/love-signal-api/main.go --config=./config/local.yaml
 
   swagger:
     aliases:
