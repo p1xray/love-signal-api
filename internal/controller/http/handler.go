@@ -6,6 +6,7 @@ import (
 	grpcclient "love-signal-api/internal/client/grpc"
 	"love-signal-api/internal/config"
 	v1 "love-signal-api/internal/controller/http/v1"
+	"love-signal-api/pkg/kafka"
 
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -14,15 +15,17 @@ import (
 
 // Handler is handler for http server requests.
 type Handler struct {
-	config     *config.Config
-	grpcClient *grpcclient.GRPCClient
+	config        *config.Config
+	grpcClient    *grpcclient.GRPCClient
+	kafkaSendData chan<- kafka.Message
 }
 
 // New creates a new http server request handler.
-func New(cfg *config.Config, grpcClient *grpcclient.GRPCClient) *Handler {
+func New(cfg *config.Config, grpcClient *grpcclient.GRPCClient, kafkaSendData chan<- kafka.Message) *Handler {
 	return &Handler{
-		config:     cfg,
-		grpcClient: grpcClient,
+		config:        cfg,
+		grpcClient:    grpcClient,
+		kafkaSendData: kafkaSendData,
 	}
 }
 
@@ -42,7 +45,7 @@ func (h *Handler) Init() *gin.Engine {
 }
 
 func (h *Handler) initAPI(router *gin.Engine) {
-	v1Handler := v1.New(h.config, h.grpcClient)
+	v1Handler := v1.New(h.config, h.grpcClient, h.kafkaSendData)
 	api := router.Group("/api")
 	{
 		v1Handler.Init(api)
