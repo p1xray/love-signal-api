@@ -8,3 +8,8 @@ grpc:
     address: 'localhost:6007'
   qr_code:
     address: 'localhost:6009'
+kafka:
+  address: 'localhost:29092,localhost:29093,localhost:29094'
+  user_coordinates_topic:
+    group_id: 'user-coordinates'
+    topic: 'user-geo-data'

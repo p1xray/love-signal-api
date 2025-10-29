@@ -11,7 +11,8 @@ import (
 type Config struct {
 	Env         string       `yaml:"env" env-default:"local"`
 	Server      ServerConfig `yaml:"server" env-required:"true"`
-	GRPCClients GRPCClients  `yaml:"grpc"`
+	GRPCClients GRPCClients  `yaml:"grpc" env-required:"true"`
+	Kafka       KafkaConfig  `yaml:"kafka" env-required:"true"`
 }
 
 // ServerConfig is the server configuration.
@@ -21,14 +22,26 @@ type ServerConfig struct {
 
 // GRPCClients is the configuration of gRPC clients.
 type GRPCClients struct {
-	Users        GRPCClient `yaml:"users"`
-	UrlShortener GRPCClient `yaml:"url_shortener"`
-	QRCode       GRPCClient `yaml:"qr_code"`
+	Users        GRPCClient `yaml:"users" env-required:"true"`
+	UrlShortener GRPCClient `yaml:"url_shortener" env-required:"true"`
+	QRCode       GRPCClient `yaml:"qr_code" env-required:"true"`
 }
 
 // GRPCClient is the configuration of gRPC client.
 type GRPCClient struct {
 	Addr string `yaml:"address" env-required:"true"`
+}
+
+// KafkaConfig is the kafka configuration.
+type KafkaConfig struct {
+	Address              string      `yaml:"address" env-required:"true"`
+	UserCoordinatesTopic TopicConfig `yaml:"user_coordinates_topic" env-required:"true"`
+}
+
+// TopicConfig is the kafka topic configuration.
+type TopicConfig struct {
+	GroupID string `yaml:"group_id" env-required:"true"`
+	Topic   string `yaml:"topic" env-required:"true"`
 }
 
 // MustLoad loads config and panics if any error occurs.

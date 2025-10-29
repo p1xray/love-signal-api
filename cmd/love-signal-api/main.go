@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"github.com/joho/godotenv"
 	"log/slog"
 	"love-signal-api/internal/app"
@@ -41,7 +42,7 @@ func main() {
 	application := app.New(log, cfg)
 
 	go func() {
-		application.MustRun()
+		application.MustRun(context.Background())
 	}()
 
 	// Graceful shutdown

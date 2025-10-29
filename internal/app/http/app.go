@@ -6,6 +6,8 @@ import (
 	"log/slog"
 	grpcclient "love-signal-api/internal/client/grpc"
 	"love-signal-api/internal/config"
+	"love-signal-api/internal/lib/logger/sl"
+	"love-signal-api/pkg/kafka"
 	"net/http"
 
 	controller "love-signal-api/internal/controller/http"
@@ -18,8 +20,13 @@ type App struct {
 }
 
 // New creates new instance of HTTP server application.
-func New(log *slog.Logger, cfg *config.Config, grpcClient *grpcclient.GRPCClient) *App {
-	handlers := controller.New(cfg, grpcClient)
+func New(
+	log *slog.Logger,
+	cfg *config.Config,
+	grpcClient *grpcclient.GRPCClient,
+	kafkaSendData chan<- kafka.Message,
+) *App {
+	handlers := controller.New(cfg, grpcClient, kafkaSendData)
 
 	httpServer := &http.Server{
 		Addr:    cfg.Server.Addr,
@@ -33,7 +40,7 @@ func New(log *slog.Logger, cfg *config.Config, grpcClient *grpcclient.GRPCClient
 }
 
 // Run starts the server.
-func (a *App) Run() error {
+func (a *App) Run() {
 	const op = "httpapp.Run"
 
 	log := a.log.With(
@@ -43,11 +50,11 @@ func (a *App) Run() error {
 
 	log.Info("running HTTP server")
 
-	if err := a.httpServer.ListenAndServe(); err != nil {
-		return fmt.Errorf("%s: %w", op, err)
-	}
-
-	return nil
+	go func() {
+		if err := a.httpServer.ListenAndServe(); err != nil {
+			log.Error("error listening HTTP server", sl.Err(err))
+		}
+	}()
 }
 
 // Stop stops the server.

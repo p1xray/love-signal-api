@@ -2,20 +2,20 @@ package app
 
 import (
 	"context"
-	"errors"
 	"log/slog"
 	grpcapp "love-signal-api/internal/app/grpc"
 	httpapp "love-signal-api/internal/app/http"
+	"love-signal-api/internal/app/kafka"
 	"love-signal-api/internal/config"
 	"love-signal-api/internal/lib/logger/sl"
-	"net/http"
 	"time"
 )
 
 // App is an application.
 type App struct {
-	log     *slog.Logger
-	httpApp *httpapp.App
+	log      *slog.Logger
+	httpApp  *httpapp.App
+	kafkaApp *kafka.App
 }
 
 // New creates new instance of application.
@@ -29,19 +29,20 @@ func New(
 		panic(err)
 	}
 
-	httpApp := httpapp.New(log, cfg, grpcClient)
+	kafkaApp := kafka.New(log, cfg.Kafka)
+	httpApp := httpapp.New(log, cfg, grpcClient, kafkaApp.Input())
 
 	return &App{
-		log:     log,
-		httpApp: httpApp,
+		log:      log,
+		httpApp:  httpApp,
+		kafkaApp: kafkaApp,
 	}
 }
 
 // MustRun runs the application and panics if an error occurs.
-func (a *App) MustRun() {
-	if err := a.httpApp.Run(); !errors.Is(err, http.ErrServerClosed) {
-		panic(err)
-	}
+func (a *App) MustRun(ctx context.Context) {
+	a.httpApp.Run()
+	a.kafkaApp.Start(ctx)
 }
 
 // GracefulStop stops the application.
@@ -52,4 +53,6 @@ func (a *App) GracefulStop() {
 	if err := a.httpApp.Stop(ctx); err != nil {
 		a.log.Error("HTTP app stop error", sl.Err(err))
 	}
+
+	a.kafkaApp.Stop()
 }
