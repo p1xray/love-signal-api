@@ -30,10 +30,10 @@ func New(cfg *config.Config, grpcClient *grpcclient.GRPCClient) *Handler {
 func (h *Handler) Init() *gin.Engine {
 	router := gin.Default()
 
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = []string{"Content-Type", "Authorization", "X-Fingerprint"}
-	router.Use(cors.New(config))
+	corsCfg := cors.DefaultConfig()
+	corsCfg.AllowAllOrigins = true
+	corsCfg.AllowHeaders = []string{"Content-Type", "Authorization", "X-Fingerprint"}
+	router.Use(cors.New(corsCfg))
 
 	h.initAPI(router)
 	initSwagger(router)
