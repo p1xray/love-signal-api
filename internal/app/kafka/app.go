@@ -28,17 +28,10 @@ func New(
 
 	producer := kafka.NewAsyncProducer(address, kafka.AcksRequireAll())
 
-	userCoordinatesConsumer := kafka.NewConsumerGroup(
-		address,
-		cfg.UserCoordinatesTopic.GroupID,
-		cfg.UserCoordinatesTopic.Topic,
-		kafka.AutoCommitOffset(),
-	)
-
 	return &App{
 		log:       log,
 		producer:  producer,
-		consumers: []*kafka.Consumer{userCoordinatesConsumer},
+		consumers: []*kafka.Consumer{},
 		input:     make(chan kafka.Message),
 	}
 }
